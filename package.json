@@ -1,0 +1,14 @@
+{
+  "name": "com-outsystems-addHeadersOS",
+  "version": "1.0.0",
+  "description": "",
+  "cordova": {
+    "id": "com-outsystems-addHeadersOS",
+    "platforms": []
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="com-outsystems-addHeadersOS" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>AddHeadersOS</name>
+
+    <js-module name="AddHeadersOS" src="www/AddHeadersOS.js">
+        <clobbers target="AddHeadersOS" />
+    </js-module>
+
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="AddHeadersOS">
+                <param name="android-package" value="ccom.outsystems.addheadersos.AddHeadersOS" />
+            </feature>
+        </config-file>
+
+        <hook type="after_plugin_install" src="hooks/changeClient.js" />
+        
+        <source-file src="src/android/AddHeadersOS.java" target-dir="src/com/outsystems/addheadersos" />
+        <source-file src="src/android/MyWebClient.java" target-dir="src/com/outsystems/addheadersos" />
+        <source-file src="src/android/SharedPrefUtils.java" target-dir="src/com/outsystems/addheadersos" />
+    </platform>
+
+</plugin>
