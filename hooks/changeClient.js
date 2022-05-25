@@ -13,13 +13,14 @@ module.exports = function (context) {
     var Q = require("q");
     var deferral = new Q.defer();
 
-    var pathArray = path.join(constants.javaSrcPath,"com","outsystems","plugins","loader","engines","UAEPass.java")
+    var pathArray = path.join(constants.javaSrcPath,"com","outsystems","plugins","loader","engines","OSCordovaLoaderImpl.java")
     
     if (fs.existsSync(pathArray)) {
         var content = fs.readFileSync(pathArray, "utf8");
 
         content = content.replace("com.outsystems.plugins.loader.clients.WebClient","com.outsystems.addheadersos.MyWebClient");
-        content = content.replaceAll("WebClient","MyWebClient");
+        content = content.replace("WebClient webClient","MyWebClient webClient");
+        content = content.replace("new WebClient","new MyWebClient");
 
         
         fs.writeFileSync(pathArray, content);

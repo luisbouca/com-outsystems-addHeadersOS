@@ -21,7 +21,10 @@ public class AddHeadersOS extends CordovaPlugin {
 
     @Override
     protected void pluginInitialize() {
-        SharedPrefUtils.saveData(cordova.getContext(),"headers","[{\"query\":\"png\",\"key\":\"test\",\"value\":\"test\"}]");
+        String headersString = SharedPrefUtils.getStringData(cordova.getContext(),"headers");
+        if(headersString == null || headersString.equals("[]")){
+            SharedPrefUtils.saveData(cordova.getContext(),"headers","[]");
+        }
     }
 
     @Override

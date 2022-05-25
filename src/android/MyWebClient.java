@@ -18,8 +18,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -40,42 +44,65 @@ public class MyWebClient extends WebClient {
                 OkHttpClient httpClient = new OkHttpClient();
                 Request.Builder newRequestBuilder = new Request.Builder()
                         .url(url.trim());
+                Map<String,String> requestHeaders = request.getRequestHeaders();
+                for (String key :requestHeaders.keySet()) {
+                    newRequestBuilder.addHeader(key,requestHeaders.get(key));
+                }
 
                 String headersString = SharedPrefUtils.getStringData(view.getContext(), "headers");
                 if (headersString != null) {
 
                     JSONArray headers = new JSONArray(headersString);
 
-                    for (int i = 0; i < headers.length(); i++) {
-                        JSONObject header = headers.getJSONObject(i);
-                        String query = header.getString("query");
-                        if (query.startsWith("/") && query.endsWith("/")) {
-                            //regex
-                            query = query.substring(1, query.length() - 2);
-                            if (Pattern.matches(query, url)) {
-                                String key = header.getString("key");
-                                String value = header.getString("value");
-                                newRequestBuilder.addHeader(key, value);
-                            }
-                        } else {
-                            //normal contains
-                            if (url.contains(query)) {
-                                String key = header.getString("key");
-                                String value = header.getString("value");
-                                newRequestBuilder.addHeader(key, value);
+                    if (headers.length() > 0) {
+
+                        Boolean hasHeaders = false;
+
+                        for (int i = 0; i < headers.length(); i++) {
+                            JSONObject header = headers.getJSONObject(i);
+                            String query = header.getString("query");
+                            if (query.startsWith("/") && query.endsWith("/")) {
+                                //regex
+                                query = query.substring(1, query.length() - 1);
+                                if (Pattern.compile(query).matcher(url).find()) {
+                                    String key = header.getString("key");
+                                    String value = header.getString("value");
+                                    newRequestBuilder.addHeader(key, value);
+                                    hasHeaders = true;
+                                }
+                            } else {
+                                //normal contains
+                                if (url.contains(query)) {
+                                    String key = header.getString("key");
+                                    String value = header.getString("value");
+                                    newRequestBuilder.addHeader(key, value);
+                                    hasHeaders = true;
+                                }
                             }
                         }
-                    }
 
-                    Request newRequest = newRequestBuilder.build();
+                        if (hasHeaders) {
 
-                    Response newResponse = httpClient.newCall(newRequest).execute();
-                    if (newResponse.body() != null) {
-                        response = new WebResourceResponse(
-                                getMimeType(url), // set content-type
-                                newResponse.header("content-encoding", "utf-8"),
-                                newResponse.body().byteStream()
-                        );
+                            Request newRequest = newRequestBuilder.build();
+
+                            Response newResponse = httpClient.newCall(newRequest).execute();
+                            if (newResponse.body() != null) {
+                                response = new WebResourceResponse(
+                                        getMimeType(url), // set content-type
+                                        newResponse.header("content-encoding", "utf-8"),
+                                        newResponse.body().byteStream()
+                                );
+                                Headers newHeaders = newResponse.headers();
+
+                                Set<String> keys = newHeaders.names();
+                                Map<String,String> headerMap = new HashMap<String, String>();
+                                for (String key :keys) {
+                                    headerMap.put(key,newHeaders.get(key));
+                                }
+                                
+                                response.setResponseHeaders(headerMap);
+                            }
+                        }
                     }
                 }
             }  catch (IOException | JSONException e) {
